@@ -1,0 +1,17 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Setting files
+stopwords_ja.txt
+stopwords_en.txt
+normalize.json
+word_cloud.png
+word_cloud.log
