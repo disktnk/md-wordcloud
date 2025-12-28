@@ -117,7 +117,8 @@ def _tokenize_english(
 ) -> Iterable[str]:
     for match in EN_PATTERN.findall(text):
         token = _normalize_en_case(match, normalize_en)
-        if token in stopwords_en:
+        # Check stopwords with case-insensitive comparison
+        if token.lower() in stopwords_en:
             continue
         if len(token) <= 2 and not any(char.isdigit() for char in token):
             continue
