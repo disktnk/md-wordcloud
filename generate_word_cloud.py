@@ -139,14 +139,13 @@ def tokenize(
 
 
 def collect_tokens(
-    target: Path,
+    paths: Iterable[Path],
     stopwords_ja: set[str],
     stopwords_en: set[str],
     normalize_ja: dict[str, str],
     normalize_en: dict[str, str],
 ) -> Counter[str]:
     counter: Counter[str] = Counter()
-    paths = sorted(p for p in target.rglob("*.md") if p.is_file())
     for path in paths:
         text = _load_markdown_text(path)
         for token in tokenize(
@@ -163,7 +162,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "target",
         type=Path,
-        help="Directory that contains markdown files (e.g. content/posts/2025).",
+        help="Directory or a single markdown file to scan (e.g. content/posts/2025 or post.md).",
     )
     parser.add_argument(
         "--top",
@@ -223,9 +222,17 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    target_dir = args.target
-    if not target_dir.is_dir():
-        raise SystemExit(f"Target directory not found: {target_dir}")
+    target = args.target
+    if target.is_dir():
+        md_paths = sorted(p for p in target.rglob("*.md") if p.is_file())
+    elif target.is_file():
+        if target.suffix.lower() != ".md":
+            raise SystemExit(f"Target file must be a markdown file: {target}")
+        md_paths = [target]
+    else:
+        raise SystemExit(f"Target not found: {target}")
+    if not md_paths:
+        raise SystemExit(f"No markdown files found under: {target}")
 
     stopwords_en = _load_stopwords(args.stopwords_en)
     stopwords_ja = _load_stopwords(args.stopwords_ja)
@@ -233,9 +240,9 @@ def main() -> None:
     normalize_en = normalize_config.get("en", {})
     normalize_ja = normalize_config.get("ja", {})
 
-    print(f"Scanning markdown files under {target_dir} ...")
+    print(f"Scanning markdown files under {target} ...")
     counter = collect_tokens(
-        target_dir, stopwords_ja, stopwords_en, normalize_ja, normalize_en
+        md_paths, stopwords_ja, stopwords_en, normalize_ja, normalize_en
     )
     if not counter:
         raise SystemExit("No tokens were extracted from the provided directory.")
