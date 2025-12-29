@@ -184,12 +184,6 @@ def parse_args() -> argparse.Namespace:
         help="Height of the generated image.",
     )
     parser.add_argument(
-        "--bg-color",
-        type=str,
-        default="white",
-        help="Background color for the word cloud image.",
-    )
-    parser.add_argument(
         "--font-path",
         type=Path,
         help="Path to a font file that supports Japanese (recommended).",
